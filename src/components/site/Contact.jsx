@@ -14,12 +14,39 @@ const NEEDS = [
 const MAP_SRC =
   "https://www.google.com/maps?q=215+Brisbane+Road,+Biggera+Waters+QLD+4216&output=embed";
 
+const FORM_ENDPOINT = "https://formspree.io/f/xkjnyqpv";
+
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(false);
+
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        body: data,
+        headers: { Accept: "application/json" },
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        form.reset();
+      } else {
+        setError(true);
+      }
+    } catch (err) {
+      setError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -92,17 +119,17 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-5">
                 <Field label="Full name" required>
-                  <input type="text" required className={inputCls} placeholder="Your name" />
+                  <input type="text" name="name" required className={inputCls} placeholder="Your name" />
                 </Field>
                 <Field label="Phone" required>
-                  <input type="tel" required className={inputCls} placeholder="04xx xxx xxx" />
+                  <input type="tel" name="phone" required className={inputCls} placeholder="04xx xxx xxx" />
                 </Field>
               </div>
               <Field label="Email" required>
-                <input type="email" required className={inputCls} placeholder="you@email.com" />
+                <input type="email" name="email" required className={inputCls} placeholder="you@email.com" />
               </Field>
               <Field label="What do you need?">
-                <select className={inputCls} defaultValue="">
+                <select name="service" className={inputCls} defaultValue="">
                   <option value="" disabled>Select a service…</option>
                   {NEEDS.map((n) => (
                     <option key={n} value={n}>{n}</option>
@@ -112,15 +139,22 @@ export default function Contact() {
               <Field label="Tell us about the job">
                 <textarea
                   rows={4}
+                  name="message"
                   className={inputCls + " resize-none"}
                   placeholder="Vehicle make/model, what happened, insurance or private job…"
                 />
               </Field>
+              {error && (
+                <p className="text-sm text-red-400 text-center">
+                  Something went wrong sending that - please try again, or call us directly.
+                </p>
+              )}
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center rounded-full bg-brand px-8 py-4 text-base font-semibold text-white shadow-xl shadow-brand/30 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-brand/40"
+                disabled={submitting}
+                className="w-full inline-flex items-center justify-center rounded-full bg-brand px-8 py-4 text-base font-semibold text-white shadow-xl shadow-brand/30 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-brand/40 disabled:opacity-60 disabled:hover:translate-y-0"
               >
-                Request my free quote
+                {submitting ? "Sending…" : "Request my free quote"}
               </button>
               <p className="text-xs text-[#9aa1ac]/70 text-center">
                 We'll get back to you within one business day. No obligation.
