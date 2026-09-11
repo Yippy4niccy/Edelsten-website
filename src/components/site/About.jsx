@@ -49,7 +49,7 @@ export default function About() {
                   src={TEAM_IMG}
                   alt="The Edelsten Auto Group team"
                   fittingType="fit"
-                  className="h-full w-full"
+                  className="h-full w-full object-cover"
                 />
               </div>
               <div className="mt-3 rounded-xl bg-[#1a1d24] px-4 py-3 border border-white/10">
